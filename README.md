@@ -69,3 +69,20 @@ Backend validates and stores the comment/rating in PostgreSQL.
    Load Balancing: Distribute traffic across multiple server instances if needed.
    Database Optimization: Use indexing and query optimization techniques.
    Caching: Implement caching strategies for frequently accessed data.
+
+Entities and Their Attributes
+
+1. Users Table:
+   UserID: Unique identifier for each user.
+   Username: User’s chosen name, must be unique.
+   Email: User’s email address, must be unique.
+   HashedPassword: Encrypted password for authentication.
+   CreatedAt: Timestamp of account creation.
+
+2. Recipes Table:
+   RecipeID: Unique identifier for each recipe.
+   Title: Name of the recipe.
+   Ingredients: List of ingredients used in the recipe.
+   Instructions: Steps to prepare the recipe.
+   AuthorID: Foreign key referencing the user who created the recipe.
+   CreatedAt: Timestamp of recipe creation.
