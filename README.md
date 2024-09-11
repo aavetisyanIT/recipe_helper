@@ -1,8 +1,9 @@
 # recipe_helper
 
 1. Overall Architecture
-   1.1. Frontend: User Interface: Developed with a modern frontend framework/library React.
-   User Experience: Provides functionalities like recipe browsing, search, user registration, login, and interaction with recipes.
+
+1.1. Frontend: User Interface: Developed with a modern frontend framework/library React.
+User Experience: Provides functionalities like recipe browsing, search, user registration, login, and interaction with recipes.
 
 1.2. Backend: API Server: Built with Node.js and Express to handle HTTP requests.
 Authentication: JWT-based authentication for secure user access.
@@ -11,21 +12,18 @@ Data Storage: PostgreSQL for relational data (users, recipes, comments, ratings)
 
 1.3. Database: PostgreSQL: Manages structured data, relationships between users, recipes, and comments.
 
-1.4. Optional Services: File Storage: For storing recipe images (e.g., AWS S3, Google Cloud Storage).
-Caching: To improve performance (e.g., Redis).
-Email Service: For notifications (e.g., SendGrid, Mailgun).
-
 2. Detailed Components
-   2.1. Frontend - React
 
+2.1. Frontend - React
 Components: Home page, recipe detail page, user profile, search functionality, and recipe creation form.
 State Management: Handles application state and user data.
-2.2. Backend (Node.js, Express)
 
+2.2. Backend (Node.js, Express)
 Routes: Define endpoints for CRUD operations on recipes, user authentication, and comments.
 Controllers: Implement business logic for each endpoint.
 Middleware: For authentication, validation, and error handling.
 Database Models: Define schemas and relationships for users, recipes, comments, and ratings.
+
 2.3. Database (PostgreSQL)
 Tables:
 Users: UserID, username, email, hashedPassword, etc.
@@ -36,7 +34,8 @@ Indexes: For optimizing queries, especially on search fields and foreign keys.
 
 2.4. Authentication (JWT) Sign Up / Login: Users register or log in to get a JWT.
 Token Validation: Middleware to protect routes and ensure users are authenticated.
-2.5. Caching (Optional) Caching Layer: To cache frequently accessed data and improve response times.
+
+2.5. Caching Layer: To cache frequently accessed data and improve response times.
 
 3. Example Data Flow
    User Registration/Login:
