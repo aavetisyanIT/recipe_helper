@@ -3,6 +3,6 @@ export interface IRecipe {
   Title: string;
   Ingredients: string;
   Instructions: string;
-  AuthorID?: number;
-  CreatedAt?: Date;
+  AuthorID: number;
+  CreatedAt: Date;
 }
