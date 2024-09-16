@@ -8,7 +8,7 @@ app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 app.get("/", async (req: Request, res: Response) => {
-  const result = await pool.query("SELECT * FROM users");
+  const result = await pool.query("SELECT * FROM pg_aggregate");
   console.log("AAA result", result);
 
   res.send(`Hello, TypeScript with Express!`);
