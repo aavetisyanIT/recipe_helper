@@ -1,9 +1,7 @@
 import { Client } from "pg";
-import { readFileSync } from "fs";
-import { join } from "path";
 import "dotenv/config";
 
-import { grantUserPermissions } from "./migrations";
+import { createTables, grantUserPermissions } from "./migrations";
 
 // PostgreSQL client configuration
 const client = new Client({
@@ -13,20 +11,13 @@ const client = new Client({
   database: process.env.DATABASE,
 });
 
-async function executeSqlFile(filePath: string) {
-  const sql = readFileSync(filePath, "utf8");
-  await client.query(sql);
-}
-
 async function setupDatabase() {
   try {
     await client.connect();
     console.log("Connected to the database.");
 
     await client.query(grantUserPermissions);
-
-    const sqlFilePath = join(__dirname, "migrations", "create_tables.sql");
-    await executeSqlFile(sqlFilePath);
+    await client.query(createTables);
 
     console.log("Database setup complete. All tables have been created.");
   } catch (error) {

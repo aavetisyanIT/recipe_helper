@@ -1,4 +1,6 @@
--- Create the 'users' table
+import "dotenv/config";
+
+export const createTables = `
 CREATE TABLE IF NOT EXISTS users (
     "UserID" SERIAL PRIMARY KEY,
     "Username" VARCHAR(255) UNIQUE NOT NULL,
@@ -6,8 +8,6 @@ CREATE TABLE IF NOT EXISTS users (
     "HashedPassword" TEXT NOT NULL,
     "CreatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
-
--- Create the 'recipes' table
 CREATE TABLE IF NOT EXISTS recipes (
     "RecipeID" SERIAL PRIMARY KEY,
     "Title" VARCHAR(255) NOT NULL,
@@ -16,3 +16,4 @@ CREATE TABLE IF NOT EXISTS recipes (
     "AuthorID" INTEGER REFERENCES users("UserID"),
     "CreatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
+`;
