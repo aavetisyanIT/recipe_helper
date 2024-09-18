@@ -1,9 +1,16 @@
-export interface RegisterRequestBody {
+import { IUser } from "../models";
+
+export interface IRegisterRequestBody {
   username: string;
   email: string;
   password: string;
 }
 
-export interface ErrorResponse {
+export interface IErrorResponse {
   error: string;
+}
+
+export interface IRegisterResponse {
+  token: string;
+  user: IUser;
 }
