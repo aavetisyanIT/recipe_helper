@@ -19,9 +19,11 @@ import {
   selectUsersByEmailAndUserName,
 } from "../db";
 
+const maxAge = Number(process.env.MAX_TOKEN_AGE);
+
 const generateToken = (userId: number): string => {
   return jwt.sign({ userId }, process.env.JWT_SECRET as string, {
-    expiresIn: Number(process.env.MAX_TOKEN_AGE),
+    expiresIn: maxAge,
   });
 };
 
@@ -57,6 +59,8 @@ export const register_post = async (
 
     const user = newUser.rows[0];
     const token = generateToken(user.id);
+
+    res.cookie("auth_token", token, { maxAge: maxAge * 1000, httpOnly: true });
 
     res.status(201).json({
       token,
@@ -94,6 +98,7 @@ export const login_post = async (
     }
 
     const token = generateToken(user.id);
+    res.cookie("auth_token", token, { maxAge: maxAge * 1000, httpOnly: true });
     res.status(200).json({
       token,
       user,
