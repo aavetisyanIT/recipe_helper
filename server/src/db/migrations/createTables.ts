@@ -2,18 +2,18 @@ import "dotenv/config";
 
 export const createTables = `
 CREATE TABLE IF NOT EXISTS users (
-    "UserID" SERIAL PRIMARY KEY,
-    "Username" VARCHAR(255) UNIQUE NOT NULL,
-    "Email" VARCHAR(255) UNIQUE NOT NULL,
-    "HashedPassword" TEXT NOT NULL,
-    "CreatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id SERIAL PRIMARY KEY,
+    user_name VARCHAR(255) UNIQUE NOT NULL,
+    email VARCHAR(255) UNIQUE NOT NULL,
+    hashed_password TEXT NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 CREATE TABLE IF NOT EXISTS recipes (
-    "RecipeID" SERIAL PRIMARY KEY,
-    "Title" VARCHAR(255) NOT NULL,
-    "Ingredients" TEXT NOT NULL,
-    "Instructions" TEXT NOT NULL,
-    "AuthorID" INTEGER REFERENCES users("UserID"),
-    "CreatedAt" TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    id SERIAL PRIMARY KEY,
+    title VARCHAR(255) NOT NULL,
+    ingredients TEXT[] NOT NULL,
+    instructions TEXT[] NOT NULL,
+    author_id INTEGER REFERENCES users(id),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 `;

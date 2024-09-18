@@ -1,8 +1,8 @@
 export interface IRecipe {
-  RecipeID: number;
-  Title: string;
-  Ingredients: string;
-  Instructions: string;
-  AuthorID: number;
-  CreatedAt: Date;
+  id: number;
+  title: string;
+  ingredients: string[];
+  instructions: string[];
+  author_id: number;
+  created_at: Date;
 }
