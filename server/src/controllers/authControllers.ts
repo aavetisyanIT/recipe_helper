@@ -1,4 +1,4 @@
-import { Request, Response } from "express";
+import { Response } from "express";
 import { QueryResult } from "pg";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -6,32 +6,36 @@ import "dotenv/config";
 
 import {
   IErrorResponse,
-  IRegisterRequestBody,
-  IRegisterResponse,
+  ILoginUserRequest,
+  ILoginUserResponse,
+  IRegisterUserRequest,
+  IRegisterUserResponse,
 } from "../types";
 import { IUser } from "../models";
 import { pool } from "../config/database.connection";
+import {
+  insertNewUser,
+  selectUsersByEmail,
+  selectUsersByEmailAndUserName,
+} from "../db";
 
-interface RegisterRequest extends Request {
-  body: IRegisterRequestBody;
-}
-
-const maxAge = 3 * 24 * 60 * 60;
 const generateToken = (userId: number): string => {
   return jwt.sign({ userId }, process.env.JWT_SECRET as string, {
-    expiresIn: maxAge,
+    expiresIn: Number(process.env.MAX_TOKEN_AGE),
   });
 };
 
 // @route   POST /auth/register
 // @desc    Register a new user
-export const register_post = async (req: RegisterRequest, res: Response) => {
+export const register_post = async (
+  req: IRegisterUserRequest,
+  res: Response<IRegisterUserResponse | IErrorResponse>,
+) => {
   const { username, email, password } = req.body;
 
   try {
     const userCheck: QueryResult<IUser> = await pool.query(
-      `SELECT * FROM users WHERE "email" = $1 OR "user_name" = $2`,
-      [email, username],
+      selectUsersByEmailAndUserName(email, username),
     );
 
     if (userCheck.rows.length > 0) {
@@ -48,23 +52,55 @@ export const register_post = async (req: RegisterRequest, res: Response) => {
 
     // Insert new user into database
     const newUser: QueryResult<IUser> = await pool.query(
-      `INSERT INTO users ("user_name", "email", "hashed_password")
-      VALUES ($1, $2, $3) RETURNING "id", "user_name", "email", "created_at"`,
-      [username, email, hashedUserPassword],
+      insertNewUser(username, email, hashedUserPassword),
     );
 
     const user = newUser.rows[0];
     const token = generateToken(user.id);
 
-    const response: IRegisterResponse = {
+    res.status(201).json({
       token,
       user,
-    };
-
-    res.status(201).json(response);
+    });
   } catch (err) {
     console.error(err);
-    const errorResponse: IErrorResponse = { error: "Registration failed" };
+    const errorResponse: IErrorResponse = { error: "User Registration failed" };
     return res.status(500).json(errorResponse);
+  }
+};
+
+// @route   POST /auth/login
+// @desc    Login and return a JWT token
+export const login_post = async (
+  req: ILoginUserRequest,
+  res: Response<ILoginUserResponse | IErrorResponse>,
+) => {
+  const { email, password } = req.body;
+  try {
+    const userResult: QueryResult<IUser> = await pool.query(
+      selectUsersByEmail(email),
+    );
+    const user = userResult.rows[0];
+    if (!user) {
+      return res.status(400).json({ error: "Invalid User Email" });
+    }
+
+    const isPasswordValid = await bcrypt.compare(
+      password,
+      user.hashed_password,
+    );
+    if (!isPasswordValid) {
+      return res.status(400).json({ error: "Invalid User Password" });
+    }
+
+    const token = generateToken(user.id);
+    res.status(200).json({
+      token,
+      user,
+    });
+  } catch (err) {
+    console.error(err);
+    const errorResponse: IErrorResponse = { error: "User Login failed" };
+    res.status(500).json(errorResponse);
   }
 };
