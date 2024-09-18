@@ -1,4 +1,4 @@
-import { Response } from "express";
+import { Request, Response } from "express";
 import { QueryResult } from "pg";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
@@ -108,4 +108,11 @@ export const login_post = async (
     const errorResponse: IErrorResponse = { error: "User Login failed" };
     res.status(500).json(errorResponse);
   }
+};
+
+// @route   GET /auth/logout
+// @desc    Logout and remove a JWT token from cookies
+export const logout_get = (req: Request, res: Response) => {
+  res.cookie("auth_token", "", { maxAge: 1 });
+  res.status(200).json("User is logged out");
 };
