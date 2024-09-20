@@ -18,8 +18,8 @@ export function selectUsersByEmail(email: string): QueryConfig {
 }
 
 export function insertNewUser(
-  email: string,
   username: string,
+  email: string,
   hashedUserPassword: string,
 ): QueryConfig {
   return {
