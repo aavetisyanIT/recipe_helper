@@ -1,7 +1,9 @@
-import "dotenv/config";
+import dotenv from "dotenv";
 import app from "./app";
 
-const PORT = process.env.PORT || 8080;
+dotenv.config({ path: `.env.${process.env.NODE_ENV || "development"}` });
+
+const PORT = process.env.HTTP_PORT;
 
 app.listen(PORT, () =>
   console.log(`Recipe Server is running on port: ${PORT}`),
