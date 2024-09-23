@@ -6,7 +6,9 @@
   "scripts": {
     "build": "tsc",
     "start": "node dist/server.js",
-    "dev": "nodemon src/server.ts",
+    "dev": "NODE_ENV=development nodemon src/server.ts",
+    "test": "NODE_ENV=test nodemon src/server.ts",
+    "prod": "NODE_ENV=production nodemon src/server.ts",
     "setup-db": "ts-node src/db/setupDatabase.ts",
     "lint": "eslint 'src/**/*.{js,ts,tsx}'",
     "lint:fix": "eslint 'src/**/*.{js,ts,tsx}' --fix"
