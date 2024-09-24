@@ -80,17 +80,12 @@ export const login_post = async (
   res: Response<ILoginUserResponse | IErrorResponse>,
 ) => {
   const { email, password } = req.body;
-  console.log("AAA email", email);
-  console.log("AAA password", password);
-
   try {
     const userResult: QueryResult<IUser> = await pool.query(
       selectUsersByEmail(email),
     );
 
     const user = userResult.rows[0];
-    console.log("AAA user", user);
-
     if (!user) {
       return res.status(400).json({ error: "Invalid User Email" });
     }
