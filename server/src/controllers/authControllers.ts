@@ -34,7 +34,6 @@ export const register_post = async (
   res: Response<IRegisterUserResponse | IErrorResponse>,
 ) => {
   const { username, email, password } = req.body;
-
   try {
     const userCheck: QueryResult<IUser> = await pool.query(
       selectUsersByEmailAndUserName(email, username),
