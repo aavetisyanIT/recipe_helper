@@ -1,7 +1,7 @@
 import { Request, Response } from "express";
 import { QueryResult } from "pg";
 import bcrypt from "bcryptjs";
-import jwt from "jsonwebtoken";
+import { sign } from "jsonwebtoken";
 import "dotenv/config";
 
 import {
@@ -18,17 +18,18 @@ import {
   selectUsersByEmail,
   selectUsersByEmailAndUserName,
 } from "../db";
+import { redisClient } from "../config";
 
 const maxAge = Number(process.env.MAX_TOKEN_AGE);
 
 const generateToken = (userId: number): string => {
-  return jwt.sign({ userId }, process.env.JWT_SECRET as string, {
+  return sign({ userId }, process.env.JWT_SECRET as string, {
     expiresIn: maxAge,
   });
 };
 
 // @route   POST /auth/register
-// @desc    Register a new user
+// @desc    Register a new user and sets cache token
 export const register_post = async (
   req: IRegisterUserRequest,
   res: Response<IRegisterUserResponse | IErrorResponse>,
@@ -59,6 +60,12 @@ export const register_post = async (
     const user = newUser.rows[0];
     const token = generateToken(user.id);
 
+    redisClient.setEx(
+      `jwt:${token}`,
+      Number(process.env.MAX_TOKEN_AGE),
+      JSON.stringify(user),
+    );
+
     res.cookie("auth_token", token, { maxAge: maxAge * 1000, httpOnly: true });
 
     res.status(201).json({
@@ -73,12 +80,13 @@ export const register_post = async (
 };
 
 // @route   POST /auth/login
-// @desc    Login and return a JWT token
+// @desc    Login and return a JWT token and sets cache
 export const login_post = async (
   req: ILoginUserRequest,
   res: Response<ILoginUserResponse | IErrorResponse>,
 ) => {
   const { email, password } = req.body;
+  const authToken = req.cookies.auth_token;
   try {
     const userResult: QueryResult<IUser> = await pool.query(
       selectUsersByEmail(email),
@@ -97,7 +105,28 @@ export const login_post = async (
       return res.status(400).json({ error: "Invalid User Password" });
     }
 
+    if (authToken) {
+      redisClient.setEx(
+        `jwt:${authToken}`,
+        Number(process.env.MAX_TOKEN_AGE),
+        JSON.stringify(user),
+      );
+      const cachedToken = await redisClient.get(`jwt:${authToken}`);
+      if (cachedToken) {
+        res
+          .status(200)
+          .json({ token: authToken, user: JSON.parse(cachedToken) });
+        return;
+      }
+    }
+
     const token = generateToken(user.id);
+    redisClient.setEx(
+      `jwt:${token}`,
+      Number(process.env.MAX_TOKEN_AGE),
+      JSON.stringify(user),
+    );
+
     res.cookie("auth_token", token, { maxAge: maxAge * 1000, httpOnly: true });
     res.status(200).json({
       token,
@@ -111,8 +140,13 @@ export const login_post = async (
 };
 
 // @route   GET /auth/logout
-// @desc    Logout and remove a JWT token from cookies
-export const logout_get = (req: Request, res: Response) => {
+// @desc    Logout and remove a JWT token from cookies and cache
+export const logout_get = async (req: Request, res: Response) => {
+  const authToken = req.cookies.auth_token;
+  const tokenKey = `jwt:${authToken}`;
+  const cachedToken = await redisClient.get(tokenKey);
+  if (cachedToken) redisClient.del(tokenKey);
+
   res.cookie("auth_token", "", { maxAge: 1 });
   res.status(200).json("User is logged out");
 };
