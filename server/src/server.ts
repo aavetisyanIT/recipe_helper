@@ -5,6 +5,7 @@ import path from "path";
 import dotenv from "dotenv";
 
 import app from "./app";
+import { connectRedis } from "./config";
 
 dotenv.config({ path: `.env.${process.env.NODE_ENV || "development"}` });
 
@@ -12,6 +13,8 @@ const HTTP_PORT = process.env.HTTP_PORT || 80;
 const HTTPS_PORT = process.env.HTTPS_PORT || 443;
 
 const isHttps = process.env.USE_HTTPS === "true";
+
+connectRedis();
 
 if (isHttps) {
   const projectRoot = path.dirname(__dirname);
