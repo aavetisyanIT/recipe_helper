@@ -17,6 +17,9 @@ export async function requireAuth(
   //check if token is cached in Redis under key: `jwt:${token}`
   const cachedToken = await redisClient.get(`jwt:${authToken}`);
   if (cachedToken) {
+    const parsedToken = JSON.parse(cachedToken);
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (req as any).user = parsedToken.user;
     return next();
   }
   verify(
@@ -32,12 +35,21 @@ export async function requireAuth(
       const expiryTime = decoded.exp
         ? decoded.exp - Math.floor(Date.now() / 1000)
         : Number(process.env.MAX_TOKEN_AGE);
+      const { id, userName, email } = decoded;
+
+      const loggedInUser = {
+        id,
+        userName,
+        email,
+      };
 
       redisClient.setEx(
         `jwt:${authToken}`,
         expiryTime,
-        JSON.stringify(decoded),
+        JSON.stringify({ user: loggedInUser }),
       );
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (req as any).user = loggedInUser;
       next();
     },
   );
