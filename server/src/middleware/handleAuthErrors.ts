@@ -6,7 +6,7 @@ import {
   IRegisterUserRequest,
   IRegisterUserResponse,
 } from "../types";
-import { validationAuthMassages } from "./utils";
+import { validationAuthMessages } from "./utils";
 
 export function handleAuthErrors(
   req: IRegisterUserRequest,
@@ -14,7 +14,7 @@ export function handleAuthErrors(
   next: NextFunction,
 ) {
   const { invalidEmail, invalidPassword, invalidUserName } =
-    validationAuthMassages;
+    validationAuthMessages;
   const errors: Result<ValidationError> = validationResult(req);
   if (errors.isEmpty()) {
     return next();

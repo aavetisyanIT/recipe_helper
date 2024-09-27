@@ -45,7 +45,7 @@ export const register_post = async (
       selectUsersByEmailAndUserName(email, username),
     );
 
-    if (userCheck.rows.length > 0) {
+    if (userCheck.rowCount && userCheck.rowCount > 0) {
       return res
         .status(400)
         .json({ error: "User with this email or username already exists" });

@@ -25,7 +25,6 @@ app.get(
   rateLimiter,
   requireAuth,
   async (req: IAuthUserRequest, res: Response) => {
-    console.log("AAA GET Users, logged in user:", req.user);
     const result: QueryResult<IUser> = await pool.query("SELECT * FROM users");
     res.status(200).json(result.rows);
   },
