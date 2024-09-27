@@ -22,10 +22,15 @@ import { redisClient } from "../config";
 
 const maxAge = Number(process.env.MAX_TOKEN_AGE);
 
-const generateToken = (userId: number): string => {
-  return sign({ userId }, process.env.JWT_SECRET as string, {
-    expiresIn: maxAge,
-  });
+const generateToken = (user: IUser): string => {
+  const { id, user_name, email } = user;
+  return sign(
+    { id, userName: user_name, email },
+    process.env.JWT_SECRET as string,
+    {
+      expiresIn: maxAge,
+    },
+  );
 };
 
 // @route   POST /auth/register
@@ -58,12 +63,14 @@ export const register_post = async (
     );
 
     const user = newUser.rows[0];
-    const token = generateToken(user.id);
+    const token = generateToken(user);
 
     redisClient.setEx(
       `jwt:${token}`,
       Number(process.env.MAX_TOKEN_AGE),
-      JSON.stringify(user),
+      JSON.stringify({
+        user: { id: user.id, userName: user.user_name, email: email },
+      }),
     );
 
     res.cookie("auth_token", token, { maxAge: maxAge * 1000, httpOnly: true });
@@ -106,11 +113,6 @@ export const login_post = async (
     }
 
     if (authToken) {
-      redisClient.setEx(
-        `jwt:${authToken}`,
-        Number(process.env.MAX_TOKEN_AGE),
-        JSON.stringify(user),
-      );
       const cachedToken = await redisClient.get(`jwt:${authToken}`);
       if (cachedToken) {
         res
@@ -120,11 +122,13 @@ export const login_post = async (
       }
     }
 
-    const token = generateToken(user.id);
+    const token = generateToken(user);
     redisClient.setEx(
       `jwt:${token}`,
       Number(process.env.MAX_TOKEN_AGE),
-      JSON.stringify(user),
+      JSON.stringify({
+        user: { id: user.id, userName: user.user_name, email: email },
+      }),
     );
 
     res.cookie("auth_token", token, { maxAge: maxAge * 1000, httpOnly: true });
