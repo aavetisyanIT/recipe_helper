@@ -22,3 +22,15 @@ export function createRecipe(
     values: [title, ingredients, instructions, author_id],
   };
 }
+
+export function selectRecipeById(
+  recipeId: number,
+  userId: number,
+): QueryConfig {
+  return {
+    text: `
+      SELECT * FROM recipes WHERE "id" = $1 AND "author_id" = $2
+    `,
+    values: [recipeId, userId],
+  };
+}
