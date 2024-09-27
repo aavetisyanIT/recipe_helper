@@ -2,20 +2,20 @@ import { Request } from "express";
 
 import { IUser } from "../models";
 
-export interface IRegisterRequestBody {
-  username: string;
-  email: string;
-  password: string;
+// this interface allow to store user data in auth middleware
+// and pass it to controllers
+export interface IAuthUserRequest extends Request {
+  user?: { id: number; userName: string; email: string };
 }
 
-export interface IErrorResponse {
-  error: string;
+export interface IRegisterUserRequest extends IAuthUserRequest {
+  body: {
+    username: string;
+    email: string;
+    password: string;
+  };
 }
-
-export interface IRegisterUserRequest extends Request {
-  body: IRegisterRequestBody;
-}
-export interface ILoginUserRequest extends Request {
+export interface ILoginUserRequest extends IAuthUserRequest {
   body: { email: string; password: string };
 }
 
@@ -27,4 +27,8 @@ export interface IRegisterUserResponse {
 export interface ILoginUserResponse {
   token: string;
   user: IUser;
+}
+
+export interface IErrorResponse {
+  error: string;
 }

@@ -1,5 +1,5 @@
-import { Request } from "express";
+import { IAuthUserRequest } from "./auth.types";
 
-export interface ICreateRecipeRequest extends Request {
+export interface ICreateRecipeRequest extends IAuthUserRequest {
   body: { userId: number };
 }
