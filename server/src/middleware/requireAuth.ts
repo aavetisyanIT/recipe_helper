@@ -30,7 +30,7 @@ export async function requireAuth(
       if (err) {
         return res.status(403).json({ error: "User is not logged in" });
       }
-      // if token not cached verify token authToken.verify
+      // if token isn't cached verify token authToken.verify
       // Cache the decoded token for the remaining token validity period (exp - current time)
       const expiryTime = decoded.exp
         ? decoded.exp - Math.floor(Date.now() / 1000)
