@@ -11,6 +11,13 @@ import { IRecipe } from "../models";
 import { pool } from "../config";
 import { QueryResult } from "pg";
 
+export const getRecipesByUserIdInteractor = async (userId: number) => {
+  const userRecipes: QueryResult<IRecipe> = await pool.query(
+    selectAllRecipesByUserId(userId),
+  );
+  return userRecipes;
+};
+
 export const recipes_get = async (
   req: IAuthUserRequest,
   res: Response<IRecipe[] | IErrorResponse>,
