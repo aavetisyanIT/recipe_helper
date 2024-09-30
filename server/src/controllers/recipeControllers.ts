@@ -2,14 +2,12 @@ import { Response } from "express";
 
 import { ICreateRecipeRequest } from "../types/recipe.types";
 import { IAuthUserRequest, IErrorResponse } from "../types";
-import {
-  createRecipe,
-  selectAllRecipesByUserId,
-  selectRecipeById,
-} from "../db";
+import { createRecipe, selectRecipeById } from "../db";
 import { IRecipe } from "../models";
 import { pool } from "../config";
 import { QueryResult } from "pg";
+import { getRecipesByUserIdInteractor } from "../interactors";
+import { getRecipesByUserIdPersistance } from "../persistance";
 
 export const recipes_get = async (
   req: IAuthUserRequest,
@@ -21,14 +19,16 @@ export const recipes_get = async (
   }
 
   try {
-    const userRecipes: QueryResult<IRecipe> = await pool.query(
-      selectAllRecipesByUserId(user.id),
+    const userRecipes = await getRecipesByUserIdInteractor(
+      getRecipesByUserIdPersistance,
+      user.id,
     );
-    if (userRecipes.rowCount === 0) {
+
+    if (userRecipes.length === 0) {
       return res.status(400).json({ error: "This user does not have recipes" });
     }
 
-    res.status(200).send(userRecipes.rows);
+    res.status(200).send(userRecipes);
   } catch (err) {
     console.error(err);
     const errorResponse: IErrorResponse = {
