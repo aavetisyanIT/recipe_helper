@@ -7,6 +7,7 @@ import { IRecipe } from "../models";
 import { pool } from "../config";
 import { QueryResult } from "pg";
 import { getRecipesByUserIdInteractor } from "../interactors";
+import { getRecipesByUserIdPersistance } from "../persistance";
 
 export const recipes_get = async (
   req: IAuthUserRequest,
@@ -18,7 +19,10 @@ export const recipes_get = async (
   }
 
   try {
-    const userRecipes = await getRecipesByUserIdInteractor(user.id);
+    const userRecipes = await getRecipesByUserIdInteractor(
+      getRecipesByUserIdPersistance,
+      user.id,
+    );
 
     if (userRecipes.length === 0) {
       return res.status(400).json({ error: "This user does not have recipes" });
