@@ -1,0 +1,15 @@
+name: Recipe Helper CI
+
+on:
+  push:
+    branch: [master]
+  pull_request: [master]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout master branch
+      - uses: actions/checkout@v2
+      - name: Run a Hello, World
+        run: echo Hello, world!
