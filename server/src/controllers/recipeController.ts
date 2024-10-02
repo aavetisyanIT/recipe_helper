@@ -1,15 +1,20 @@
 import { Response } from "express";
+import { pool } from "../config";
+import { QueryResult } from "pg";
 
 import { ICreateRecipeRequest } from "../types/recipe.types";
 import { IAuthUserRequest, IErrorResponse } from "../types";
 import { createRecipe, selectRecipeById } from "../db";
 import { IRecipe } from "../models";
-import { pool } from "../config";
-import { QueryResult } from "pg";
-import { getRecipesByUserIdInteractor } from "../interactors";
-import { getRecipesByUserIdPersistance } from "../persistance";
+import { IRecipeInteractor } from "../interfaces";
 
-class RecipeController {
+export class RecipeController {
+  private interactor: IRecipeInteractor;
+
+  constructor(interactor: IRecipeInteractor) {
+    this.interactor = interactor;
+  }
+
   async getAllRecipes(
     req: IAuthUserRequest,
     res: Response<IRecipe[] | IErrorResponse>,
@@ -20,11 +25,7 @@ class RecipeController {
     }
 
     try {
-      const userRecipes = await getRecipesByUserIdInteractor(
-        getRecipesByUserIdPersistance,
-        user.id,
-      );
-
+      const userRecipes = await this.interactor.getRecipesByUserId(user.id);
       if (userRecipes.length === 0) {
         return res
           .status(400)
@@ -99,5 +100,3 @@ class RecipeController {
     }
   }
 }
-
-export const controller = new RecipeController();

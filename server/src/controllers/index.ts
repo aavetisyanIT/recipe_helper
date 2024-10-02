@@ -1,2 +1,2 @@
 export * from "./authControllers";
-export * from "./recipe.controller";
+export * from "./recipeController";
