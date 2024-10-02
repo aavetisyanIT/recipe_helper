@@ -1,1 +1,1 @@
-export * from "./recipe_interactors";
+export * from "./recipeInteractor";
