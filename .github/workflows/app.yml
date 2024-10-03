@@ -30,7 +30,7 @@ jobs:
         uses: actions/setup-node@v3
 
       - name: Install local dependencies
-        run: npm install
+        run: npm install --prefix server
 
-      - name: Run Server win Dev
+      - name: Run Server in Dev
         run: npm run server-dev
