@@ -4,7 +4,7 @@
   "description": "recipe helper application",
   "main": "index.js",
   "scripts": {
-    "server-dev": "npm run dev --prefix server",
+    "server-dev": "npm run build --prefix server && npm run start dist/server.js --prefix server",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
