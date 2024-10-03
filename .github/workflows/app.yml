@@ -28,8 +28,7 @@ jobs:
 
       - name: User Node JS version 20
         uses: actions/setup-node@v3
-        with:
-          node-version: "20"
+
       - name: Install local dependencies
         run: npm install
 
