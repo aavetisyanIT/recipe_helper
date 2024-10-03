@@ -63,4 +63,4 @@ jobs:
 
       - name: Run Server in Dev
         run: |
-          npm run server-dev && exit
+          npm run server-build
