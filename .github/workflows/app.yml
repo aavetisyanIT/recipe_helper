@@ -27,12 +27,7 @@ jobs:
           POSTGRES_DB: recipe_helper_db
           POSTGRES_USER: recipe_helper_app
           POSTGRES_PASSWORD: secure_recipe_helper_password
-        options: >
-          --health-cmd "pg_isready -U test_user -d test_db"
-          --health-interval 10s
-          --health-timeout 5s
-          --health-retries 5
-
+        options: --health-cmd "pg_isready -U test_user -d test_db" --health-interval 10s --health-timeout 5s --health-retries 5
     steps:
       - name: Checkout master branch
         uses: actions/checkout@v3
