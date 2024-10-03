@@ -31,7 +31,7 @@ jobs:
         with:
           node-version: "20"
 
-      - name: Install local dependencies
+      - name: Install server local dependencies
         run: npm install --prefix server
 
       - name: Run Server in Dev
