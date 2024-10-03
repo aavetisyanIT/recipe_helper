@@ -60,5 +60,11 @@ jobs:
           echo "PASSWORD_HASH_SALT=${{ secrets.PASSWORD_HASH_SALT }}" >> $GITHUB_ENV
           echo "MAX_TOKEN_AGE=${{ secrets.MAX_TOKEN_AGE }}" >> $GITHUB_ENV
 
+      - name: Wait for PostgreSQL
+        run: until pg_isready -h localhost -p 5432 -U test_user; do sleep 1; done
+
+      - name: Run Migrations
+        run: npm run setup-db --prefix server
+
       - name: Run Server in Dev
         run: npm run server-dev
