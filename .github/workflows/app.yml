@@ -2,8 +2,11 @@ name: Recipe Helper CI
 
 on:
   push:
-    branch: [master]
-  pull_request: [master]
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
   build:
