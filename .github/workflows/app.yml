@@ -10,7 +10,6 @@ on:
 
 jobs:
   build:
-    CI: true
     runs-on: ubuntu-latest
 
     services:
@@ -63,4 +62,5 @@ jobs:
         run: npm run setup-db --prefix server
 
       - name: Run Server in Dev
-        run: npm run server-dev
+        run: |
+          npm run server-dev && exit
