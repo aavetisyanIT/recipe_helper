@@ -34,6 +34,12 @@ jobs:
       - name: Install server local dependencies
         run: npm install --prefix server
 
+        - name: Set secrets and test 
+          env: 
+            SSL_KEY_PATH: ${{ secrets.SSL_KEY_PATH }}
+            run: |
+              echo "Using secret: $SSL_KEY_PATH"
+
         # Inject environment variables from GitHub Secrets
       - name: Set environment variables from secrets
         run: |
