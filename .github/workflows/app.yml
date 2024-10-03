@@ -37,7 +37,6 @@ jobs:
         # Inject environment variables from GitHub Secrets
       - name: Set environment variables from secrets
         run: |
-          echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> $GITHUB_ENV
           echo "USE_HTTPS=${{ secrets.USE_HTTPS }}" >> $GITHUB_ENV
           echo "HTTP_PORT=HTTP_PORT" >> $GITHUB_ENV
           echo "SSL_KEY_PATH=SSL_KEY_PATH" >> $GITHUB_ENV
