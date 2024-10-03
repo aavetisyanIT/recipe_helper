@@ -24,11 +24,11 @@ jobs:
         ports:
           - 5432:5432
         env:
-          POSTGRES_DB: ${{ secrets.DATABASE }}
-          POSTGRES_USER: ${{ secrets.DB_USER }}
-          POSTGRES_PASSWORD: ${{ secrets.DB_PASSWORD }}
+          POSTGRES_DB: recipe_helper_db
+          POSTGRES_USER: recipe_helper_app
+          POSTGRES_PASSWORD: secure_recipe_helper_password
         options: >
-          --health-cmd "pg_isready -U ${{ secrets.DB_USER }}" 
+          --health-cmd "pg_isready -U recipe_helper_app" 
           --health-interval 10s 
           --health-timeout 5s 
           --health-retries 5
