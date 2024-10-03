@@ -2,8 +2,6 @@ import { createClient } from "redis";
 
 import "dotenv/config";
 
-console.log("AAA process.env.REDIS_URL", process.env.REDIS_URL);
-
 export const redisClient = createClient({
   url: process.env.REDIS_URL || "redis://localhost:6379",
 });
