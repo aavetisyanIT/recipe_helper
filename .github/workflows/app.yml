@@ -23,9 +23,6 @@ jobs:
       - name: Checkout master branch
         uses: actions/checkout@v3
 
-      - name: Run a Hello, World
-        run: echo Hello, world!
-
       - name: User Node JS version 20
         uses: actions/setup-node@v3
         with:
@@ -34,27 +31,21 @@ jobs:
       - name: Install server local dependencies
         run: npm install --prefix server
 
-      - name: Set secrets and test
-        env:
-          SSL_KEY_PATH: ${{ secrets.SSL_KEY_PATH }}
-        run: |
-          echo "Using secret: $SSL_KEY_PATH"
-
         # Inject environment variables from GitHub Secrets
       - name: Set environment variables from secrets
         run: |
           echo "USE_HTTPS=${{ secrets.USE_HTTPS }}" >> $GITHUB_ENV
-          echo "HTTP_PORT=HTTP_PORT" >> $GITHUB_ENV
-          echo "SSL_KEY_PATH=SSL_KEY_PATH" >> $GITHUB_ENV
-          echo "SSL_CERT_PATH=SSL_CERT_PATH" >> $GITHUB_ENV
-          echo "REDIS_URL=REDIS_URL" >> $GITHUB_ENV
-          echo "DB_USER=DB_USER" >> $GITHUB_ENV
-          echo "DB_HOST=DB_HOST" >> $GITHUB_ENV
-          echo "DATABASE=DATABASE" >> $GITHUB_ENV
-          echo "DB_PASSWORD=DB_PASSWORD" >> $GITHUB_ENV
-          echo "JWT_SECRET=JWT_SECRET" >> $GITHUB_ENV
-          echo "PASSWORD_HASH_SALT=PASSWORD_HASH_SALT" >> $GITHUB_ENV
-          echo "MAX_TOKEN_AGE=MAX_TOKEN_AGE" >> $GITHUB_ENV
+          echo "HTTP_PORT=${{ secrets.HTTP_PORT }}" >> $GITHUB_ENV
+          echo "SSL_KEY_PATH=${{ secrets.SSL_KEY_PATH }}" >> $GITHUB_ENV
+          echo "SSL_CERT_PATH=${{ secrets.SSL_CERT_PATH }}" >> $GITHUB_ENV
+          echo "REDIS_URL=${{ secrets.REDIS_URL }}" >> $GITHUB_ENV
+          echo "DB_USER=${{ secrets.DB_USER }}" >> $GITHUB_ENV
+          echo "DB_HOST=${{ secrets.DB_HOST }}" >> $GITHUB_ENV
+          echo "DATABASE=${{ secrets.DATABASE }}" >> $GITHUB_ENV
+          echo "DB_PASSWORD=${{ secrets.DB_PASSWORD }}" >> $GITHUB_ENV
+          echo "JWT_SECRET=${{ secrets.JWT_SECRET }}" >> $GITHUB_ENV
+          echo "PASSWORD_HASH_SALT=${{ secrets.PASSWORD_HASH_SALT }}" >> $GITHUB_ENV
+          echo "MAX_TOKEN_AGE=${{ secrets.MAX_TOKEN_AGE }}" >> $GITHUB_ENV
 
       - name: Run Server in Dev
         run: npm run server-dev
