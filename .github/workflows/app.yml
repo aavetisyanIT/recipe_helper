@@ -31,7 +31,6 @@ jobs:
       - name: Install server local dependencies
         run: npm install --prefix server
 
-        # Inject environment variables from GitHub Secrets
       - name: Set environment variables from secrets
         run: |
           echo "USE_HTTPS=${{ secrets.USE_HTTPS }}" >> $GITHUB_ENV
