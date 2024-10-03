@@ -28,7 +28,7 @@ jobs:
           POSTGRES_USER: recipe_helper_app
           POSTGRES_PASSWORD: secure_recipe_helper_password
         options: >
-          --health-cmd "pg_isready -U recipe_helper_app" 
+          --health-cmd "pg_isready -U recipe_helper_app -d recipe_helper_db" 
           --health-interval 10s 
           --health-timeout 5s 
           --health-retries 5
@@ -61,7 +61,7 @@ jobs:
           echo "MAX_TOKEN_AGE=${{ secrets.MAX_TOKEN_AGE }}" >> $GITHUB_ENV
 
       - name: Wait for PostgreSQL
-        run: until pg_isready -h localhost -p 5432 -U test_user; do sleep 1; done
+        run: until pg_isready -h localhost -p 5432 -U recipe_helper_app; do sleep 1; done
 
       - name: Run Migrations
         run: npm run setup-db --prefix server
