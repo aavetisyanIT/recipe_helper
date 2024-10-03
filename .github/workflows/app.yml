@@ -34,8 +34,22 @@ jobs:
       - name: Install server local dependencies
         run: npm install --prefix server
 
-      - name: Set environment variables for dev
-        run: echo "HTTP_PORT=3000" >> $GITHUB_ENV
+        # Inject environment variables from GitHub Secrets
+      - name: Set environment variables from secrets
+        run: |
+          echo "NODE_ENV=${{ secrets.NODE_ENV }}" >> $GITHUB_ENV
+          echo "USE_HTTPS=${{ secrets.USE_HTTPS }}" >> $GITHUB_ENV
+          echo "HTTP_PORT=HTTP_PORT" >> $GITHUB_ENV
+          echo "SSL_KEY_PATH=SSL_KEY_PATH" >> $GITHUB_ENV
+          echo "SSL_CERT_PATH=SSL_CERT_PATH" >> $GITHUB_ENV
+          echo "REDIS_URL=REDIS_URL" >> $GITHUB_ENV
+          echo "DB_USER=DB_USER" >> $GITHUB_ENV
+          echo "DB_HOST=DB_HOST" >> $GITHUB_ENV
+          echo "DATABASE=DATABASE" >> $GITHUB_ENV
+          echo "DB_PASSWORD=DB_PASSWORD" >> $GITHUB_ENV
+          echo "JWT_SECRET=JWT_SECRET" >> $GITHUB_ENV
+          echo "PASSWORD_HASH_SALT=PASSWORD_HASH_SALT" >> $GITHUB_ENV
+          echo "MAX_TOKEN_AGE=MAX_TOKEN_AGE" >> $GITHUB_ENV
 
       - name: Run Server in Dev
         run: npm run server-dev
