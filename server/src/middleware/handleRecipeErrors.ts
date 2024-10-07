@@ -1,9 +1,8 @@
 import { NextFunction, Response } from "express";
 import { Result, ValidationError, validationResult } from "express-validator";
 
-import { ICreateRecipeRequest } from "../types/recipe.types";
 import { IRecipe } from "../models";
-import { IErrorResponse } from "../types";
+import { IErrorResponse, ICreateRecipeRequest } from "../types";
 import { validationRecipeMessages } from "./utils";
 
 export function handleRecipeErrors(
