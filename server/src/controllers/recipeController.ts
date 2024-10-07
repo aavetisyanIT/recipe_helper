@@ -4,7 +4,7 @@ import { QueryResult } from "pg";
 
 import { ICreateRecipeRequest } from "../types/recipe.types";
 import { IAuthUserRequest, IErrorResponse } from "../types";
-import { createRecipe, selectRecipeById } from "../db";
+import { createRecipe } from "../db";
 import { IRecipe } from "../models";
 import { IRecipeInteractor } from "../interfaces";
 
@@ -83,14 +83,15 @@ export class RecipeController {
     }
 
     try {
-      const recipe: QueryResult<IRecipe> = await pool.query(
-        selectRecipeById(recipeId, user.id),
+      const recipe: IRecipe | null = await this.interactor.getRecipeByRecipeId(
+        recipeId,
+        user.id,
       );
-      if (recipe.rowCount === 0) {
+      if (!recipe) {
         return res.status(400).json({ error: "No recipe with provided id" });
       }
 
-      res.status(200).json(recipe.rows[0]);
+      res.status(200).json(recipe);
     } catch (err) {
       console.error(err);
       const errorResponse: IErrorResponse = {
