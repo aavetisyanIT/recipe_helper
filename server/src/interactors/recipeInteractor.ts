@@ -10,4 +10,11 @@ export class RecipeInteractor implements IRecipeInteractor {
   async getRecipesByUserId(userId: number): Promise<IRecipe[]> {
     return this.repository.getRecipesByUserId(userId);
   }
+
+  async getRecipeByRecipeId(
+    recipeId: number,
+    userId: number,
+  ): Promise<IRecipe | null> {
+    return this.repository.getRecipeByRecipeId(recipeId, userId);
+  }
 }
