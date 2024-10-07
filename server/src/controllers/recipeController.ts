@@ -1,10 +1,10 @@
 import { Response } from "express";
-import { pool } from "../config";
-import { QueryResult } from "pg";
 
-import { ICreateRecipeRequest } from "../types/recipe.types";
-import { IAuthUserRequest, IErrorResponse } from "../types";
-import { createRecipe } from "../db";
+import {
+  IAuthUserRequest,
+  IErrorResponse,
+  ICreateRecipeRequest,
+} from "../types";
 import { IRecipe } from "../models";
 import { IRecipeInteractor } from "../interfaces";
 
@@ -53,13 +53,19 @@ export class RecipeController {
     }
 
     try {
-      const newRecipe: QueryResult<IRecipe> = await pool.query(
-        createRecipe(title, ingredients, instructions, user.id),
+      const newRecipe = await this.interactor.createNewRecipe(
+        title,
+        ingredients,
+        instructions,
+        user.id,
       );
 
-      const recipe = newRecipe.rows[0];
+      if (!newRecipe)
+        return res
+          .status(401)
+          .json({ error: "Recipe could not be created. Try again, please." });
 
-      res.status(200).send(recipe);
+      res.status(200).send(newRecipe);
     } catch (err) {
       console.error(err);
       const errorResponse: IErrorResponse = {

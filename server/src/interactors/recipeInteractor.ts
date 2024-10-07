@@ -17,4 +17,17 @@ export class RecipeInteractor implements IRecipeInteractor {
   ): Promise<IRecipe | null> {
     return this.repository.getRecipeByRecipeId(recipeId, userId);
   }
+  async createNewRecipe(
+    title: string,
+    ingredients: string[],
+    instructions: string[],
+    author_id: number,
+  ): Promise<IRecipe | null> {
+    return await this.repository.createNewRecipe(
+      title,
+      ingredients,
+      instructions,
+      author_id,
+    );
+  }
 }

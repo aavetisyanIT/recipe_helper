@@ -6,4 +6,10 @@ export interface IRecipeRepository {
     recipeId: number,
     userId: number,
   ): Promise<IRecipe | null>;
+  createNewRecipe(
+    title: string,
+    ingredients: string[],
+    instructions: string[],
+    author_id: number,
+  ): Promise<IRecipe | null>;
 }

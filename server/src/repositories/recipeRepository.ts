@@ -3,7 +3,11 @@ import { Pool, QueryResult } from "pg";
 import { IRecipeRepository } from "../interfaces/IRecipeRepository";
 import { IRecipe } from "../models";
 import { pool } from "../config";
-import { selectAllRecipesByUserId, selectRecipeById } from "../db";
+import {
+  createRecipe,
+  selectAllRecipesByUserId,
+  selectRecipeById,
+} from "../db";
 
 export class RecipeRepository implements IRecipeRepository {
   private client: Pool;
@@ -25,5 +29,18 @@ export class RecipeRepository implements IRecipeRepository {
     );
     if (recipe.rowCount === 0) return null;
     return recipe.rows[0];
+  }
+
+  async createNewRecipe(
+    title: string,
+    ingredients: string[],
+    instructions: string[],
+    author_id: number,
+  ): Promise<IRecipe | null> {
+    const newRecipe: QueryResult<IRecipe> = await this.client.query(
+      createRecipe(title, ingredients, instructions, author_id),
+    );
+    if (newRecipe.rowCount === 0) return null;
+    return newRecipe.rows[0];
   }
 }
