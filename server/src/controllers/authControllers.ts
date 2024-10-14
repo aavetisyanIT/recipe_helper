@@ -19,6 +19,67 @@ import {
   selectUsersByEmailAndUserName,
 } from "../db";
 import { redisClient } from "../config";
+import { IAuthInteractor } from "../interfaces";
+
+export class AuthController {
+  private interactor: IAuthInteractor;
+
+  constructor(interactor: IAuthInteractor) {
+    this.interactor = interactor;
+  }
+  // @route   POST /auth/register
+  // @desc    Register a new user and sets cache token
+  async registerNewUser(
+    req: IRegisterUserRequest,
+    res: Response<IRegisterUserResponse | IErrorResponse>,
+  ) {
+    const { username, email, password } = req.body;
+    try {
+      const userCheck: IUser = await this.interactor.getUserByEmailAndUserName(
+        email,
+        username,
+      );
+      if (userCheck) {
+        return res.status(400).json({
+          error: "User with this email or username already exists",
+        });
+      }
+
+      const hashedUserPassword = await this.interactor.hashNewUserPassword(
+        password,
+      );
+
+      const newUser: IUser = await this.interactor.addNewUser(
+        username,
+        email,
+        hashedUserPassword,
+      );
+
+      const token = this.interactor.generateToken(newUser);
+      this.interactor.cacheNewUser(
+        token,
+        newUser.id,
+        newUser.user_name,
+        newUser.email,
+      );
+      res.cookie("auth_token", token, {
+        maxAge: maxAge * 1000,
+        httpOnly: true,
+      });
+
+      res.status(201).json({
+        token,
+        user: newUser,
+      });
+    } catch (err) {
+      console.error(err);
+      const errorResponse: IErrorResponse = {
+        error: "User Registration failed",
+      };
+      return res.status(500).json(errorResponse);
+    }
+  }
+}
 
 const maxAge = Number(process.env.MAX_TOKEN_AGE);
 
@@ -33,8 +94,6 @@ const generateToken = (user: IUser): string => {
   );
 };
 
-// @route   POST /auth/register
-// @desc    Register a new user and sets cache token
 export const register_post = async (
   req: IRegisterUserRequest,
   res: Response<IRegisterUserResponse | IErrorResponse>,
