@@ -1,9 +1,12 @@
 import { IUser } from "../models";
 
 export interface IAuthInteractor {
-  getUserByEmailAndUserName(email: string, username: string): Promise<IUser>;
+  getUserByEmailAndUserName(
+    email: string,
+    userName: string,
+  ): Promise<IUser | null>;
   addNewUser(
-    username: string,
+    userName: string,
     email: string,
     hashedUserPassword: string,
   ): Promise<IUser>;
