@@ -13,11 +13,7 @@ import {
 } from "../types";
 import { IUser } from "../models";
 import { pool } from "../config/database.connection";
-import {
-  insertNewUser,
-  selectUsersByEmail,
-  selectUsersByEmailAndUserName,
-} from "../db";
+import { selectUsersByEmail } from "../db";
 import { redisClient } from "../config";
 import { IAuthInteractor } from "../interfaces";
 
@@ -92,57 +88,6 @@ const generateToken = (user: IUser): string => {
       expiresIn: maxAge,
     },
   );
-};
-
-export const register_post = async (
-  req: IRegisterUserRequest,
-  res: Response<IRegisterUserResponse | IErrorResponse>,
-) => {
-  const { username, email, password } = req.body;
-  try {
-    const userCheck: QueryResult<IUser> = await pool.query(
-      selectUsersByEmailAndUserName(email, username),
-    );
-
-    if (userCheck.rowCount && userCheck.rowCount > 0) {
-      return res
-        .status(400)
-        .json({ error: "User with this email or username already exists" });
-    }
-
-    // Hash password using bcryptjs
-    const saltRounds = bcrypt.genSaltSync(
-      parseInt(process.env.PASSWORD_HASH_SALT || "10", 10),
-    );
-    const hashedUserPassword = await bcrypt.hash(password, saltRounds);
-
-    // Insert new user into database
-    const newUser: QueryResult<IUser> = await pool.query(
-      insertNewUser(username, email, hashedUserPassword),
-    );
-
-    const user = newUser.rows[0];
-    const token = generateToken(user);
-
-    redisClient.setEx(
-      `jwt:${token}`,
-      Number(process.env.MAX_TOKEN_AGE),
-      JSON.stringify({
-        user: { id: user.id, userName: user.user_name, email: email },
-      }),
-    );
-
-    res.cookie("auth_token", token, { maxAge: maxAge * 1000, httpOnly: true });
-
-    res.status(201).json({
-      token,
-      user,
-    });
-  } catch (err) {
-    console.error(err);
-    const errorResponse: IErrorResponse = { error: "User Registration failed" };
-    return res.status(500).json(errorResponse);
-  }
 };
 
 // @route   POST /auth/login
