@@ -35,11 +35,11 @@ export class AuthController {
   ) {
     const { username, email, password } = req.body;
     try {
-      const userCheck: IUser = await this.interactor.getUserByEmailAndUserName(
+      const existingUser = await this.interactor.getUserByEmailAndUserName(
         email,
         username,
       );
-      if (userCheck) {
+      if (existingUser) {
         return res.status(400).json({
           error: "User with this email or username already exists",
         });
