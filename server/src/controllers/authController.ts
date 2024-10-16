@@ -1,7 +1,5 @@
 import { Request, Response } from "express";
-import { QueryResult } from "pg";
-import bcrypt from "bcryptjs";
-import { sign } from "jsonwebtoken";
+
 import "dotenv/config";
 
 import {
@@ -12,23 +10,9 @@ import {
   IRegisterUserResponse,
 } from "../types";
 import { IUser } from "../models";
-import { pool } from "../config/database.connection";
-import { selectUsersByEmail } from "../db";
-import { redisClient } from "../config";
 import { IAuthInteractor } from "../interfaces";
 
 const maxAge = Number(process.env.MAX_TOKEN_AGE);
-
-const generateToken = (user: IUser): string => {
-  const { id, user_name, email } = user;
-  return sign(
-    { id, userName: user_name, email },
-    process.env.JWT_SECRET as string,
-    {
-      expiresIn: maxAge,
-    },
-  );
-};
 
 export class AuthController {
   private interactor: IAuthInteractor;
@@ -98,25 +82,22 @@ export class AuthController {
     const { email, password } = req.body;
     const authToken = req.cookies.auth_token;
     try {
-      const userResult: QueryResult<IUser> = await pool.query(
-        selectUsersByEmail(email),
-      );
-
-      const user = userResult.rows[0];
+      const user: IUser | null = await this.interactor.getUserByEmail(email);
       if (!user) {
         return res.status(400).json({ error: "Invalid User Email" });
       }
 
-      const isPasswordValid = await bcrypt.compare(
+      const isPasswordValid = await this.interactor.checkHashedPassword(
         password,
         user.hashed_password,
       );
+
       if (!isPasswordValid) {
         return res.status(400).json({ error: "Invalid User Password" });
       }
 
       if (authToken) {
-        const cachedToken = await redisClient.get(`jwt:${authToken}`);
+        const cachedToken = await this.interactor.getCachedToken(authToken);
         if (cachedToken) {
           res
             .status(200)
@@ -125,14 +106,8 @@ export class AuthController {
         }
       }
 
-      const token = generateToken(user);
-      redisClient.setEx(
-        `jwt:${token}`,
-        Number(process.env.MAX_TOKEN_AGE),
-        JSON.stringify({
-          user: { id: user.id, userName: user.user_name, email: email },
-        }),
-      );
+      const token = this.interactor.generateToken(user);
+      this.interactor.cacheNewUser(token, user.id, user.user_name, user.email);
 
       res.cookie("auth_token", token, {
         maxAge: maxAge * 1000,
@@ -153,9 +128,8 @@ export class AuthController {
   // @desc    Logout and remove a JWT token from cookies and cache
   async logoutUser(req: Request, res: Response) {
     const authToken = req.cookies.auth_token;
-    const tokenKey = `jwt:${authToken}`;
-    const cachedToken = await redisClient.get(tokenKey);
-    if (cachedToken) redisClient.del(tokenKey);
+    const cachedToken = await this.interactor.getCachedToken(authToken);
+    if (cachedToken) await this.interactor.deleteCachedToken(authToken);
 
     res.cookie("auth_token", "", { maxAge: 1 });
     res.status(200).json("User is logged out");
