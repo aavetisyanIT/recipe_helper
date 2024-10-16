@@ -17,6 +17,19 @@ import { selectUsersByEmail } from "../db";
 import { redisClient } from "../config";
 import { IAuthInteractor } from "../interfaces";
 
+const maxAge = Number(process.env.MAX_TOKEN_AGE);
+
+const generateToken = (user: IUser): string => {
+  const { id, user_name, email } = user;
+  return sign(
+    { id, userName: user_name, email },
+    process.env.JWT_SECRET as string,
+    {
+      expiresIn: maxAge,
+    },
+  );
+};
+
 export class AuthController {
   private interactor: IAuthInteractor;
 
@@ -75,86 +88,76 @@ export class AuthController {
       return res.status(500).json(errorResponse);
     }
   }
-}
 
-const maxAge = Number(process.env.MAX_TOKEN_AGE);
+  // @route   POST /auth/login
+  // @desc    Login and return a JWT token and sets cache
+  async loginUser(
+    req: ILoginUserRequest,
+    res: Response<ILoginUserResponse | IErrorResponse>,
+  ) {
+    const { email, password } = req.body;
+    const authToken = req.cookies.auth_token;
+    try {
+      const userResult: QueryResult<IUser> = await pool.query(
+        selectUsersByEmail(email),
+      );
 
-const generateToken = (user: IUser): string => {
-  const { id, user_name, email } = user;
-  return sign(
-    { id, userName: user_name, email },
-    process.env.JWT_SECRET as string,
-    {
-      expiresIn: maxAge,
-    },
-  );
-};
-
-// @route   POST /auth/login
-// @desc    Login and return a JWT token and sets cache
-export const login_post = async (
-  req: ILoginUserRequest,
-  res: Response<ILoginUserResponse | IErrorResponse>,
-) => {
-  const { email, password } = req.body;
-  const authToken = req.cookies.auth_token;
-  try {
-    const userResult: QueryResult<IUser> = await pool.query(
-      selectUsersByEmail(email),
-    );
-
-    const user = userResult.rows[0];
-    if (!user) {
-      return res.status(400).json({ error: "Invalid User Email" });
-    }
-
-    const isPasswordValid = await bcrypt.compare(
-      password,
-      user.hashed_password,
-    );
-    if (!isPasswordValid) {
-      return res.status(400).json({ error: "Invalid User Password" });
-    }
-
-    if (authToken) {
-      const cachedToken = await redisClient.get(`jwt:${authToken}`);
-      if (cachedToken) {
-        res
-          .status(200)
-          .json({ token: authToken, user: JSON.parse(cachedToken) });
-        return;
+      const user = userResult.rows[0];
+      if (!user) {
+        return res.status(400).json({ error: "Invalid User Email" });
       }
+
+      const isPasswordValid = await bcrypt.compare(
+        password,
+        user.hashed_password,
+      );
+      if (!isPasswordValid) {
+        return res.status(400).json({ error: "Invalid User Password" });
+      }
+
+      if (authToken) {
+        const cachedToken = await redisClient.get(`jwt:${authToken}`);
+        if (cachedToken) {
+          res
+            .status(200)
+            .json({ token: authToken, user: JSON.parse(cachedToken) });
+          return;
+        }
+      }
+
+      const token = generateToken(user);
+      redisClient.setEx(
+        `jwt:${token}`,
+        Number(process.env.MAX_TOKEN_AGE),
+        JSON.stringify({
+          user: { id: user.id, userName: user.user_name, email: email },
+        }),
+      );
+
+      res.cookie("auth_token", token, {
+        maxAge: maxAge * 1000,
+        httpOnly: true,
+      });
+      res.status(200).json({
+        token,
+        user,
+      });
+    } catch (err) {
+      console.error(err);
+      const errorResponse: IErrorResponse = { error: "User Login failed" };
+      res.status(500).json(errorResponse);
     }
-
-    const token = generateToken(user);
-    redisClient.setEx(
-      `jwt:${token}`,
-      Number(process.env.MAX_TOKEN_AGE),
-      JSON.stringify({
-        user: { id: user.id, userName: user.user_name, email: email },
-      }),
-    );
-
-    res.cookie("auth_token", token, { maxAge: maxAge * 1000, httpOnly: true });
-    res.status(200).json({
-      token,
-      user,
-    });
-  } catch (err) {
-    console.error(err);
-    const errorResponse: IErrorResponse = { error: "User Login failed" };
-    res.status(500).json(errorResponse);
   }
-};
 
-// @route   GET /auth/logout
-// @desc    Logout and remove a JWT token from cookies and cache
-export const logout_get = async (req: Request, res: Response) => {
-  const authToken = req.cookies.auth_token;
-  const tokenKey = `jwt:${authToken}`;
-  const cachedToken = await redisClient.get(tokenKey);
-  if (cachedToken) redisClient.del(tokenKey);
+  // @route   GET /auth/logout
+  // @desc    Logout and remove a JWT token from cookies and cache
+  async logoutUser(req: Request, res: Response) {
+    const authToken = req.cookies.auth_token;
+    const tokenKey = `jwt:${authToken}`;
+    const cachedToken = await redisClient.get(tokenKey);
+    if (cachedToken) redisClient.del(tokenKey);
 
-  res.cookie("auth_token", "", { maxAge: 1 });
-  res.status(200).json("User is logged out");
-};
+    res.cookie("auth_token", "", { maxAge: 1 });
+    res.status(200).json("User is logged out");
+  }
+}

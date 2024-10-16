@@ -1,6 +1,6 @@
 import express, { Router } from "express";
 
-import { login_post, logout_get, AuthController } from "../controllers";
+import { AuthController } from "../controllers";
 import {
   userLoginValidation,
   userRegistrationValidation,
@@ -21,7 +21,12 @@ authRouter.post(
   handleAuthErrors,
   controller.registerNewUser.bind(controller),
 );
-authRouter.post("/login", userLoginValidation, handleAuthErrors, login_post);
-authRouter.get("/logout", logout_get);
+authRouter.post(
+  "/login",
+  userLoginValidation,
+  handleAuthErrors,
+  controller.loginUser.bind(controller),
+);
+authRouter.get("/logout", controller.logoutUser.bind(controller));
 
 export default authRouter;
