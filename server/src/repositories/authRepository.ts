@@ -1,13 +1,18 @@
 import { Pool } from "pg";
 import bcrypt from "bcryptjs";
 import { sign } from "jsonwebtoken";
+import { RedisClientType } from "redis";
+
 import "dotenv/config";
 
 import { IAuthRepository } from "../interfaces";
 import { pool, redisClient } from "../config";
-import { insertNewUser, selectUsersByEmailAndUserName } from "../db";
+import {
+  insertNewUser,
+  selectUsersByEmail,
+  selectUsersByEmailAndUserName,
+} from "../db";
 import { IUser } from "../models";
-import { RedisClientType } from "redis";
 
 export class AuthRepository implements IAuthRepository {
   private client: Pool;
@@ -24,6 +29,10 @@ export class AuthRepository implements IAuthRepository {
     this.redisClient = redisClient;
   }
 
+  private generateRedisTokenKey(token: string): string {
+    return `jwt:${token}`;
+  }
+
   async selectUserByEmailAndUserName(
     email: string,
     userName: string,
@@ -34,8 +43,22 @@ export class AuthRepository implements IAuthRepository {
     if (!userQueryRes.rowCount) return null;
     return userQueryRes.rows[0];
   }
+
+  async selectUserByEmail(email: string): Promise<IUser | null> {
+    const userQueryRes = await this.client.query(selectUsersByEmail(email));
+    if (!userQueryRes.rowCount) return null;
+    return userQueryRes.rows[0];
+  }
+
   async hashNewUserPassword(password: string): Promise<string> {
     return await bcrypt.hash(password, this.saltRounds);
+  }
+
+  async checkHashedPassword(
+    password: string,
+    hashedPassword: string,
+  ): Promise<boolean> {
+    return await bcrypt.compare(password, hashedPassword);
   }
 
   async createNewUser(
@@ -66,12 +89,24 @@ export class AuthRepository implements IAuthRepository {
     userName: string,
     email: string,
   ): void {
-    redisClient.setEx(
-      `jwt:${token}`,
+    this.redisClient.setEx(
+      this.generateRedisTokenKey(token),
       Number(process.env.MAX_TOKEN_AGE),
       JSON.stringify({
         user: { id, userName, email },
       }),
     );
+  }
+
+  async getCachedToken(token: string) {
+    const cachedToken = await this.redisClient.get(
+      this.generateRedisTokenKey(token),
+    );
+    if (cachedToken) return cachedToken;
+    return null;
+  }
+
+  async deleteCachedToken(token: string): Promise<void> {
+    await this.redisClient.del(this.generateRedisTokenKey(token));
   }
 }
