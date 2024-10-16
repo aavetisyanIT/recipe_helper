@@ -6,7 +6,14 @@ export interface IAuthRepository {
     userName: string,
   ): Promise<IUser | null>;
 
+  selectUserByEmail(email: string): Promise<IUser | null>;
+
   hashNewUserPassword(password: string): Promise<string>;
+
+  checkHashedPassword(
+    password: string,
+    hashedPassword: string,
+  ): Promise<boolean>;
 
   createNewUser(
     userName: string,
@@ -22,4 +29,8 @@ export interface IAuthRepository {
     userName: string,
     email: string,
   ): void;
+
+  getCachedToken(token: string): Promise<string | null>;
+
+  deleteCachedToken(token: string): Promise<void>;
 }

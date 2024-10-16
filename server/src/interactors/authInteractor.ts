@@ -15,8 +15,19 @@ export class AuthInteractor implements IAuthInteractor {
     return this.repository.selectUserByEmailAndUserName(email, userName);
   }
 
+  async getUserByEmail(email: string): Promise<IUser | null> {
+    return this.repository.selectUserByEmail(email);
+  }
+
   async hashNewUserPassword(password: string): Promise<string> {
     return this.repository.hashNewUserPassword(password);
+  }
+
+  async checkHashedPassword(
+    password: string,
+    hashedPassword: string,
+  ): Promise<boolean> {
+    return this.repository.checkHashedPassword(password, hashedPassword);
   }
 
   async addNewUser(
@@ -38,5 +49,13 @@ export class AuthInteractor implements IAuthInteractor {
     email: string,
   ): void {
     this.repository.cacheNewUser(token, id, userName, email);
+  }
+
+  async getCachedToken(token: string) {
+    return this.repository.getCachedToken(token);
+  }
+
+  async deleteCachedToken(token: string): Promise<void> {
+    await this.repository.deleteCachedToken(token);
   }
 }
