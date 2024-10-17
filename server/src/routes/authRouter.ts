@@ -29,4 +29,15 @@ authRouter.post(
 );
 authRouter.get("/logout", controller.logoutUser.bind(controller));
 
+// TODO: mount this route properly
+// authRouter.get(
+//   "/",
+//   rateLimiter,
+//   requireAuth,
+//   async (req: IAuthUserRequest, res: Response) => {
+//     const result: QueryResult<IUser> = await pool.query("SELECT * FROM users");
+//     res.status(200).json(result.rows);
+//   },
+// );
+
 export default authRouter;
