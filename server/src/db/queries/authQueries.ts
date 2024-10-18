@@ -28,3 +28,9 @@ export function insertNewUser(
     values: [username, email, hashedUserPassword],
   };
 }
+
+export function selectAllUsers(): QueryConfig {
+  return {
+    text: "SELECT * FROM users",
+  };
+}
