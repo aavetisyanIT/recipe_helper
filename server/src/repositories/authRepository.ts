@@ -1,4 +1,4 @@
-import { Pool } from "pg";
+import { Pool, QueryResult } from "pg";
 import bcrypt from "bcryptjs";
 import { sign } from "jsonwebtoken";
 import { RedisClientType } from "redis";
@@ -9,6 +9,7 @@ import { IAuthRepository } from "../interfaces";
 import { pool, redisClient } from "../config";
 import {
   insertNewUser,
+  selectAllUsers,
   selectUsersByEmail,
   selectUsersByEmailAndUserName,
 } from "../db";
@@ -31,6 +32,13 @@ export class AuthRepository implements IAuthRepository {
 
   private generateRedisTokenKey(token: string): string {
     return `jwt:${token}`;
+  }
+
+  async getAllUsers(): Promise<IUser[] | []> {
+    const usersQueryRes: QueryResult<IUser> = await this.client.query(
+      selectAllUsers(),
+    );
+    return usersQueryRes.rowCount ? usersQueryRes.rows : [];
   }
 
   async selectUserByEmailAndUserName(

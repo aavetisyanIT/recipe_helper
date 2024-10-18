@@ -1,6 +1,8 @@
 import { IUser } from "../models";
 
 export interface IAuthRepository {
+  getAllUsers(): Promise<IUser[] | []>;
+
   selectUserByEmailAndUserName(
     email: string,
     userName: string,
