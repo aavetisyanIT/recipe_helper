@@ -8,6 +8,10 @@ export class AuthInteractor implements IAuthInteractor {
     this.repository = repository;
   }
 
+  async getAllUsers(): Promise<IUser[] | []> {
+    return this.repository.getAllUsers();
+  }
+
   async getUserByEmailAndUserName(
     email: string,
     userName: string,

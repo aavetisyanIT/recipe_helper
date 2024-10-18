@@ -1,6 +1,8 @@
 import { IUser } from "../models";
 
 export interface IAuthInteractor {
+  getAllUsers(): Promise<IUser[] | []>;
+
   getUserByEmailAndUserName(
     email: string,
     userName: string,
