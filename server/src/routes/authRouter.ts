@@ -5,7 +5,7 @@ import {
   userLoginValidation,
   userRegistrationValidation,
 } from "../middleware/validators";
-import { handleAuthErrors } from "../middleware";
+import { handleAuthErrors, requireAuth } from "../middleware";
 import { AuthInteractor } from "../interactors";
 import { AuthRepository } from "../repositories";
 
@@ -28,16 +28,6 @@ authRouter.post(
   controller.loginUser.bind(controller),
 );
 authRouter.get("/logout", controller.logoutUser.bind(controller));
-
-// TODO: mount this route properly
-// authRouter.get(
-//   "/",
-//   rateLimiter,
-//   requireAuth,
-//   async (req: IAuthUserRequest, res: Response) => {
-//     const result: QueryResult<IUser> = await pool.query("SELECT * FROM users");
-//     res.status(200).json(result.rows);
-//   },
-// );
+authRouter.get("/users", requireAuth, controller.getAllUsers.bind(controller));
 
 export default authRouter;

@@ -3,6 +3,7 @@ import { Request, Response } from "express";
 import "dotenv/config";
 
 import {
+  IAuthUserRequest,
   IErrorResponse,
   ILoginUserRequest,
   ILoginUserResponse,
@@ -19,6 +20,20 @@ export class AuthController {
 
   constructor(interactor: IAuthInteractor) {
     this.interactor = interactor;
+  }
+  // @route   GET /auth/users
+  // @desc    Send list of all users
+  async getAllUsers(req: IAuthUserRequest, res: Response) {
+    try {
+      const users: IUser[] | [] = await this.interactor.getAllUsers();
+      res.status(200).json(users);
+    } catch (err) {
+      console.error(err);
+      const errorResponse: IErrorResponse = {
+        error: "Not able to get users",
+      };
+      return res.status(500).json(errorResponse);
+    }
   }
   // @route   POST /auth/register
   // @desc    Register a new user and sets cache token
